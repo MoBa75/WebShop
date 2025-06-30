@@ -1,9 +1,6 @@
-# test_product_service.py
-
 from datamanager.product_service import ProductService
 from datamanager.postgres_data_manager import PostgresDataManager
 
-# Instanzen initialisieren
 data_manager = PostgresDataManager()
 product_service = ProductService(data_manager)
 

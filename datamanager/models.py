@@ -3,7 +3,25 @@ from sqlalchemy.orm import relationship
 from .database import Base
 from datetime import datetime
 
+
 class User(Base):
+    """
+    Represents a user of the system, either a customer or an admin.
+
+    Attributes:
+        id (int): Primary key.
+        first_name (str): First name of the user.
+        last_name (str): Last name of the user.
+        company (str): Optional company name.
+        email (str): Unique email address.
+        phone_number (str): Contact phone number.
+        address (str): Street and house number.
+        zip_code (int): Postal code.
+        city (str): City of residence.
+        is_admin (bool): Admin status (default: False).
+        created_at (datetime): Timestamp when the user was created.
+        updated_at (datetime): Timestamp when the user was last updated.
+    """
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -23,11 +41,25 @@ class User(Base):
 
 
 class Product(Base):
+    """
+    Represents a product that can be ordered by users.
+
+    Attributes:
+        id (int): Primary key.
+        name (str): Product name.
+        unit (str): Unit of measure (e.g., "piece", "bottle").
+        price (float): Unit price.
+        description (str): Product description.
+        stock (int): Current inventory.
+        image_path (str): Relative path to the image folder.
+        created_at (datetime): Creation timestamp.
+        updated_at (datetime): Last updated timestamp.
+    """
     __tablename__ = "products"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
-    unit = Column(String)  # mengeangabe
+    unit = Column(String)
     price = Column(Float)
     description = Column(String)
     stock = Column(Integer)
@@ -38,9 +70,18 @@ class Product(Base):
     order_items = relationship("OrderItem", back_populates="product")
 
 
-# Fortsetzung von User und Product...
-
 class Order(Base):
+    """
+    Represents a customer order.
+
+    Attributes:
+        id (int): Primary key.
+        user_id (int): Foreign key to the user placing the order.
+        date (date): Date the order was placed.
+        status (str): Status of the order (e.g., "processing", "shipped").
+        created_at (datetime): Creation timestamp.
+        updated_at (datetime): Last updated timestamp.
+    """
     __tablename__ = "orders"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -57,6 +98,16 @@ class Order(Base):
 
 
 class OrderItem(Base):
+    """
+    Represents an individual item within an order.
+
+    Attributes:
+        id (int): Primary key.
+        order_id (int): Foreign key to the order.
+        product_id (int): Foreign key to the product.
+        quantity (int): Number of units ordered.
+        unit_price (float): Price per unit at the time of order.
+    """
     __tablename__ = "order_items"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -70,6 +121,16 @@ class OrderItem(Base):
 
 
 class Invoice(Base):
+    """
+    Represents an invoice for a completed order.
+
+    Attributes:
+        id (int): Primary key.
+        order_id (int): Foreign key to the order.
+        invoice_date (date): Date of the invoice.
+        total_amount (float): Total amount to be paid.
+        is_paid (bool): Payment status.
+    """
     __tablename__ = "invoices"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -83,6 +144,15 @@ class Invoice(Base):
 
 
 class Reminder(Base):
+    """
+    Represents a reminder for an unpaid invoice.
+
+    Attributes:
+        id (int): Primary key.
+        invoice_id (int): Foreign key to the invoice.
+        reminder_date (date): Date the reminder was sent.
+        status (str): Status of the reminder (e.g., "open", "closed").
+    """
     __tablename__ = "reminders"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -94,6 +164,16 @@ class Reminder(Base):
 
 
 class Shipment(Base):
+    """
+    Represents the shipment details of an order.
+
+    Attributes:
+        id (int): Primary key.
+        order_id (int): Foreign key to the order.
+        tracking_number (str): Shipment tracking number.
+        shipped_date (date): Date the order was shipped.
+        carrier (str): Shipping service provider.
+    """
     __tablename__ = "shipments"
 
     id = Column(Integer, primary_key=True, index=True)
