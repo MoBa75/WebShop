@@ -1,16 +1,17 @@
 from fastapi import FastAPI
 import uvicorn
 
+from routes.web_routes import router as web_router
+#from routes.user_routes import router as user_router
+#from routes.product_routes import router as product_router
+#from routes.admin_routes import router as admin_router
+
 app = FastAPI()
 
-
-@app.get("/")
-async def root():
-    return "What the fuck2" #{"message": "Hello World"}
-
-@app.get("/items/{item_id}")
-async def read_item(item_id: int):
-    return {"item_id": item_id}
+app.include_router(web_router)
+#app.include_router(user_router, prefix="/api/users")
+#app.include_router(product_router, prefix="/api/products")
+#app.include_router(admin_router, prefix="/admin")  # ggf. HTML & API geschützt
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=5002, reload=True)
