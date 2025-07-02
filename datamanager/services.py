@@ -78,3 +78,4 @@ def user_exists_by_email(db: Session, email: str) -> bool:
         bool: True if the user exists, False otherwise.
     """
     return db.query(User).filter(User.email == email).first() is not None
+

@@ -98,7 +98,12 @@ class UserService:
         for key, value in kwargs.items():
             if hasattr(user, key):
                 setattr(user, key, value)
-        return self.data_manager.commit_only()
+
+        result, status = self.data_manager.commit_only()
+        if status != 200:
+            return result, status
+
+        return {"message": "User updated successfully"}, 200
 
     def delete_user(self, user_id: int) -> Tuple[Union[str, dict], int]:
         """
