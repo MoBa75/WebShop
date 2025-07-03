@@ -21,7 +21,7 @@ class UserService:
 
     def create_user(self, first_name: str, last_name: str, email: str, phone_number: str,
                     address: str, zip_code: int, city: str, is_admin: bool = False,
-                    company: Optional[str] = None) -> Tuple[dict, int]:
+                    company: Optional[str] = None, birth_date: Optional[str] = None) -> Tuple[dict, int]:
         """
         Creates a new user if the email address is not already taken.
 
@@ -33,8 +33,9 @@ class UserService:
             address (str): Street and house number.
             zip_code (int): Postal code.
             city (str): City of residence.
-            is_admin (bool, optional): Whether the user is an admin. Defaults to False.
+            is_admin (bool, optional): Whether the user is an admin.
             company (str, optional): Company name, if applicable.
+            birth_date (str, optional): Birth date of the user (ISO format: YYYY-MM-DD).
 
         Returns:
             Tuple[dict, int]: A success or error message with an HTTP status code.
@@ -51,7 +52,8 @@ class UserService:
             address=address,
             zip_code=zip_code,
             city=city,
-            is_admin=is_admin
+            is_admin=is_admin,
+            birth_date=birth_date
         )
 
         return self.data_manager.add_element(new_user)
