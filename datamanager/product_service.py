@@ -1,13 +1,19 @@
 from datamanager.models import Product
-from datamanager.services import create_product_image_folder, product_exists_by_name, product_exists_by_id
+from datamanager.services import (
+    create_product_image_folder,
+    delete_product_image_folder,
+    product_exists_by_name,
+    product_exists_by_id
+)
 from typing import Tuple, Optional, List, Union
 from datamanager.data_manager_interface import DataManagerInterface
+from fastapi import HTTPException
 
 
 class ProductService:
     """
     Service class responsible for managing product-related operations.
-    Includes creation, retrieval, updating, and deletion of products.
+    Includes creation, retrieval, updating, deletion, and stock control.
     """
 
     def __init__(self, data_manager: DataManagerInterface):
@@ -111,4 +117,55 @@ class ProductService:
             return {"error": "Product not found."}, 404
 
         product = self.data_manager.get_by_id(Product, product_id)
+        delete_product_image_folder(product.name)
         return self.data_manager.delete_element(product)
+
+    def check_product_stock(self, product: Product, requested_quantity: int):
+        """
+        Validates whether the product has sufficient stock for the requested quantity.
+
+        Args:
+            product (Product): The product instance to check.
+            requested_quantity (int): The quantity the user wants to purchase.
+
+        Raises:
+            HTTPException: If the product is out of stock or not enough is available.
+        """
+        if product.stock == 0:
+            raise HTTPException(status_code=400, detail=f"Product '{product.name}' is currently out of stock.")
+
+        if product.stock < requested_quantity:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Only {product.stock} units of '{product.name}' are available. Do you want to proceed with that amount?"
+            )
+
+    def reduce_product_stock(self, product: Product, quantity: int):
+        """
+        Reduces the product's stock by the given quantity.
+
+        Args:
+            product (Product): The product to update.
+            quantity (int): The quantity to subtract from stock.
+        """
+        product.stock -= quantity
+
+    def increase_product_stock(self, product: Product, quantity: int):
+        """
+        Increases the product's stock by the given quantity.
+
+        Args:
+            product (Product): The product to update.
+            quantity (int): The quantity to add to stock.
+        """
+        product.stock += quantity
+
+    def reset_product_stock(self, product: Product, previous_quantity: int):
+        """
+        Resets the product's stock to a previous value (e.g., after a failed transaction).
+
+        Args:
+            product (Product): The product to update.
+            previous_quantity (int): The stock value to restore.
+        """
+        product.stock = previous_quantity

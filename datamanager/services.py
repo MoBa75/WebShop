@@ -2,7 +2,10 @@ import os
 import re
 from datamanager.models import Product, User
 from sqlalchemy.orm import Session
+import shutil
+import logging
 
+logger = logging.getLogger(__name__)
 
 def create_product_image_folder(product_name: str) -> str:
     """
@@ -18,10 +21,37 @@ def create_product_image_folder(product_name: str) -> str:
     safe_name = re.sub(r'\W+', '_', product_name.strip()).lower()
     folder_path = os.path.join("static", "product_images", safe_name)
 
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
+    try:
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+            logger.info(f"Created folder for product images: {folder_path}")
+        else:
+            logger.debug(f"Folder already exists: {folder_path}")
+    except Exception as e:
+        logger.error(f"Failed to create folder '{folder_path}': {e}")
+        raise
 
     return folder_path
+
+
+def delete_product_image_folder(product_name: str):
+    """
+    Deletes the folder containing images of a specific product.
+
+    Args:
+        product_name (str): The name of the product.
+    """
+    safe_name = re.sub(r'\W+', '_', product_name.strip()).lower()
+    folder_path = os.path.join("static", "product_images", safe_name)
+
+    try:
+        if os.path.exists(folder_path):
+            shutil.rmtree(folder_path)
+            logger.info(f"Deleted image folder: {folder_path}")
+        else:
+            logger.warning(f"Image folder not found: {folder_path}")
+    except Exception as error:
+        logger.error(f"Error deleting image folder {folder_path}: {error}")
 
 
 def product_exists_by_name(db: Session, name: str) -> bool:

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
-from datetime import date
-from typing import Optional
+from datetime import datetime, date
+from typing import Optional, List
 
 
 class UserCreate(BaseModel):
@@ -65,3 +65,34 @@ class ProductUpdate(BaseModel):
     price: Optional[float] = Field(None, ge=0, description="Price must be non-negative")
     description: Optional[str] = None
     stock: Optional[int] = Field(None, ge=0, description="Stock must be non-negative")
+
+
+class OrderItemCreate(BaseModel):
+    product_id: int
+    quantity: int = Field(..., gt=0, description="Quantity must be greater than 0")
+
+
+
+class OrderCreate(BaseModel):
+    user_id: int
+    items: List[OrderItemCreate]
+
+
+class OrderItemResponse(BaseModel):
+    product_id: int
+    quantity: int
+    unit_price: float
+
+    class Config:
+        from_attributes = True
+
+
+class OrderResponse(BaseModel):
+    id: int
+    user_id: int
+    date: datetime
+    status: str
+    items: List[OrderItemResponse]
+
+    class Config:
+        from_attributes = True
