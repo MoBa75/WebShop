@@ -120,7 +120,7 @@ class ProductService:
         delete_product_image_folder(product.name)
         return self.data_manager.delete_element(product)
 
-    def check_product_stock(self, product: Product, requested_quantity: int):
+    def check_product_stock(self, product_id, requested_quantity: int):
         """
         Validates whether the product has sufficient stock for the requested quantity.
 
@@ -131,6 +131,7 @@ class ProductService:
         Raises:
             HTTPException: If the product is out of stock or not enough is available.
         """
+        product = self.data_manager.get_by_id(Product, product_id)
         if product.stock == 0:
             raise HTTPException(status_code=400, detail=f"Product '{product.name}' is currently out of stock.")
 
@@ -140,7 +141,7 @@ class ProductService:
                 detail=f"Only {product.stock} units of '{product.name}' are available. Do you want to proceed with that amount?"
             )
 
-    def reduce_product_stock(self, product: Product, quantity: int):
+    def reduce_product_stock(self, product_id, quantity: int):
         """
         Reduces the product's stock by the given quantity.
 
@@ -148,6 +149,7 @@ class ProductService:
             product (Product): The product to update.
             quantity (int): The quantity to subtract from stock.
         """
+        product = self.data_manager.get_by_id(Product, product_id)
         product.stock -= quantity
 
     def increase_product_stock(self, product: Product, quantity: int):

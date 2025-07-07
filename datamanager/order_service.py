@@ -45,7 +45,7 @@ def create_order(db: Session, order_data: OrderCreate):
         for item in order_data.items:
             # Check and deduct stock using product service
             product_service.check_product_stock(item.product_id, item.quantity)
-            product_service.deduct_product_stock(item.product_id, item.quantity)
+            product_service.reduce_product_stock(item.product_id, item.quantity)
             stock_changes.append((item.product_id, item.quantity))
 
             product = db.query(Product).filter(Product.id == item.product_id).first()
@@ -62,10 +62,10 @@ def create_order(db: Session, order_data: OrderCreate):
         db.refresh(new_order)
         return new_order
 
-    except Exception as ex:
+    except Exception as error:
         db.rollback()
         # Restore any stock that was already deducted
         for pid, qty in stock_changes:
             product_service.restore_product_stock(pid, qty)
         db.commit()
-        raise HTTPException(status_code=500, detail=f"Order failed: {str(ex)}")
+        raise HTTPException(status_code=500, detail=f"Order failed: {str(error)}")
