@@ -98,7 +98,7 @@ class UserService:
 
         user = self.data_manager.get_by_id(User, user_id)
         for key, value in kwargs.items():
-            if hasattr(user, key):
+            if hasattr(user, key) and value is not None:
                 setattr(user, key, value)
 
         result, status = self.data_manager.commit_only()

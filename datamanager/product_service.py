@@ -99,7 +99,7 @@ class ProductService:
 
         product = self.data_manager.get_by_id(Product, product_id)
         for key, value in kwargs.items():
-            if hasattr(product, key):
+            if hasattr(product, key) and value is not None:
                 setattr(product, key, value)
         return self.data_manager.commit_only()
 
