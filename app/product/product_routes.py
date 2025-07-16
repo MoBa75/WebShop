@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
-from datamanager.postgres_data_manager import PostgresDataManager
-from datamanager.product_service import ProductService
-from datamanager.schemas import ProductCreate, ProductUpdate
-from datamanager.data_manager_interface import DataManagerInterface
+from app.postgres_data_manager import PostgresDataManager
+from app.product.product_service import ProductService
+from app.product.product_schemas import ProductCreate, ProductUpdate
+from app.data_manager_interface import DataManagerInterface
 
 router = APIRouter()
 

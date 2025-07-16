@@ -1,8 +1,8 @@
 from sqlalchemy.exc import SQLAlchemyError
-from datamanager.database import SessionLocal
+from app.database import SessionLocal
 from typing import Union, Tuple
-from datamanager.models import User, Product, Order, OrderItem, Invoice, Reminder, Shipment
-from datamanager.data_manager_interface import DataManagerInterface
+from app.models import User, Product, Order, OrderItem, Invoice, Reminder, Shipment
+from app.data_manager_interface import DataManagerInterface
 
 
 class PostgresDataManager(DataManagerInterface):

@@ -1,11 +1,89 @@
-from sqlalchemy.orm import Session
 from datetime import datetime
-from fastapi import HTTPException
-from datamanager.models import Order, OrderItem, User, Product
-from datamanager.services import user_exists_by_id, product_exists_by_id, validate_quantity, reduce_stock_on_checkout
 import logging
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+from app.models import Product, OrderItem, Order, User
 
 logger = logging.getLogger(__name__)
+
+
+def user_exists_by_id(db: Session, user_id: int) -> bool:
+    """
+    Checks whether a user with the given ID exists in the database.
+
+    Args:
+        db (Session): The active SQLAlchemy database session.
+        user_id (int): The ID of the user to check.
+
+    Returns:
+        bool: True if the user exists, False otherwise.
+    """
+    return db.query(User).filter(User.id == user_id).first() is not None
+
+
+def product_exists_by_id(db: Session, product_id: int) -> bool:
+    """
+    Checks whether a product with the given ID exists in the database.
+
+    Args:
+        db (Session): The active SQLAlchemy database session.
+        product_id (int): The ID of the product to check.
+
+    Returns:
+        bool: True if a product with the specified ID exists, False otherwise.
+    """
+    return db.query(Product).filter(Product.id == product_id).first() is not None
+
+
+def validate_quantity(quantity: int):
+    """
+    Validates that the given quantity is greater than zero.
+
+    Args:
+        quantity (int): The quantity to be validated.
+
+    Raises:
+        HTTPException: If the quantity is less than or equal to zero,
+                           an HTTP 400 Bad Request is raised with an appropriate message.
+    """
+    if quantity <= 0:
+        raise HTTPException(status_code=400, detail="Quantity must be greater than 0")
+
+
+def reduce_stock_on_checkout(db: Session, order: Order, levels=None):
+    """
+    Deducts product quantities from inventory for all items in a given order.
+
+    This function checks if each product in the order has enough stock.
+    If stock is sufficient, it reduces the stock by the ordered quantity.
+    If not, it raises an appropriate HTTPException.
+
+    Args:
+        db (Session): The active SQLAlchemy database session.
+        order (Order): The order instance whose items are to be processed.
+
+    Raises:
+        HTTPException: If a product does not exist or if the available stock
+                           is insufficient for any of the order items.
+    """
+
+    for item in order.items:
+        product = db.query(Product).filter(Product.id == item.product_id).first()
+
+        if not product:
+            raise HTTPException(status_code=404, detail=f"Product with ID {item.product_id} not found.")
+
+        if product.stock < item.quantity:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Not enough stock for product '{product.name}'. Available: {product.stock}, Required: {item.quantity}"
+            )
+
+        product.stock -= item.quantity
+
+    db.commit()
+    logger.info(f"Stock reduced for order {order.id}")
+
 
 def get_or_create_cart_order(db: Session, user_id: int) -> Order:
     """

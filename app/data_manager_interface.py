@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Union, Tuple
-from datamanager.models import User, Product, Order, OrderItem, Invoice, Reminder, Shipment
+from app.models import User, Product, Order, OrderItem, Invoice, Reminder, Shipment
 
 class DataManagerInterface(ABC):
     @abstractmethod

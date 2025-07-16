@@ -1,7 +1,35 @@
-from datamanager.models import User
-from datamanager.services import user_exists_by_id, user_exists_by_email
+from app.models import User
 from typing import Tuple, Optional, List, Union
-from datamanager.data_manager_interface import DataManagerInterface
+from app.data_manager_interface import DataManagerInterface
+from sqlalchemy.orm import Session
+
+
+def user_exists_by_id(db: Session, user_id: int) -> bool:
+    """
+    Checks whether a user with the given ID exists in the database.
+
+    Args:
+        db (Session): The active SQLAlchemy database session.
+        user_id (int): The ID of the user to check.
+
+    Returns:
+        bool: True if the user exists, False otherwise.
+    """
+    return db.query(User).filter(User.id == user_id).first() is not None
+
+
+def user_exists_by_email(db: Session, email: str) -> bool:
+    """
+    Checks whether a user with the given email address exists in the database.
+
+    Args:
+        db (Session): The active SQLAlchemy database session.
+        email (str): The email address of the user to check.
+
+    Returns:
+        bool: True if a user with the given email exists, False otherwise.
+    """
+    return db.query(User).filter(User.email == email).first() is not None
 
 
 class UserService:

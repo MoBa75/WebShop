@@ -1,13 +1,100 @@
-from datamanager.models import Product
-from datamanager.services import (
-    create_product_image_folder,
-    delete_product_image_folder,
-    product_exists_by_name,
-    product_exists_by_id
-)
+from app.models import Product
 from typing import Tuple, Optional, List, Union
-from datamanager.data_manager_interface import DataManagerInterface
+from app.data_manager_interface import DataManagerInterface
 from fastapi import HTTPException
+import os
+import re
+import shutil
+import logging
+from sqlalchemy.orm import Session
+
+
+def create_product_image_folder(product_name: str) -> str:
+    """
+    Creates a sanitized folder for storing product images.
+
+    This function takes a product name, sanitizes it by replacing non-word characters
+    with underscores, and uses it to create a folder path under 'static/product_images/'.
+    If the folder does not already exist, it will be created.
+
+    Args:
+        product_name (str): The name of the product used to generate the folder name.
+
+    Returns:
+        str: The full path to the created (or existing) image folder.
+
+    Raises:
+        Exception: If an error occurs while creating the folder.
+    """
+    safe_name = re.sub(r'\W+', '_', product_name.strip()).lower()
+    folder_path = os.path.join("static", "product_images", safe_name)
+
+    try:
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+            logger.info(f"Created folder for product images: {folder_path}")
+        else:
+            logger.debug(f"Folder already exists: {folder_path}")
+    except Exception as e:
+        logger.error(f"Failed to create folder '{folder_path}': {e}")
+        raise
+
+    return folder_path
+
+
+def delete_product_image_folder(product_name: str):
+    """
+    Deletes the image folder associated with a given product name.
+    This function constructs a sanitized folder name based on the product name
+    and attempts to remove the corresponding directory from the filesystem.
+
+    Args:
+        product_name (str): The name of the product whose image folder should be deleted.
+
+    Logs:
+        - Info log if the folder was successfully deleted.
+        - Warning log if the folder does not exist.
+        - Error log if an exception occurs during deletion.
+    """
+    safe_name = re.sub(r'\W+', '_', product_name.strip()).lower()
+    folder_path = os.path.join("static", "product_images", safe_name)
+
+    try:
+        if os.path.exists(folder_path):
+            shutil.rmtree(folder_path)
+            logger.info(f"Deleted image folder: {folder_path}")
+        else:
+            logger.warning(f"Image folder not found: {folder_path}")
+    except Exception as error:
+        logger.error(f"Error deleting image folder {folder_path}: {error}")
+
+
+def product_exists_by_name(db: Session, name: str) -> bool:
+    """
+    Checks whether a product with the given name exists in the database.
+
+    Args:
+        db (Session): The active SQLAlchemy database session.
+        name (str): The name of the product to check.
+
+    Returns:
+        bool: True if a product with the specified name exists, False otherwise.
+    """
+    return db.query(Product).filter(Product.name == name).first() is not None
+
+
+def product_exists_by_id(db: Session, product_id: int) -> bool:
+    """
+    Checks whether a product with the given ID exists in the database.
+
+    Args:
+        db (Session): The active SQLAlchemy database session.
+        product_id (int): The ID of the product to check.
+
+    Returns:
+        bool: True if a product with the specified ID exists, False otherwise.
+    """
+    return db.query(Product).filter(Product.id == product_id).first() is not None
 
 
 class ProductService:

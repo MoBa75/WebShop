@@ -2,9 +2,9 @@ from fastapi import FastAPI
 import uvicorn
 
 from routes.web_routes import router as web_router
-from routes.user_routes import router as user_router
-from routes.product_routes import router as product_router
-from routes.order_routes import router as order_router
+from app.user.user_routes import router as user_router
+from app.product.product_routes import router as product_router
+from app.order.order_routes import router as order_router
 # from routes.admin_routes import router as admin_router
 
 app = FastAPI()

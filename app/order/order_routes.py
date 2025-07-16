@@ -1,13 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from datamanager.database import get_db
-from datamanager.order_service import (
+from app.database import get_db
+from app.order.order_service import (
     add_to_cart,
     get_cart,
     update_cart_item,
     remove_from_cart,
     checkout_cart,
     get_user_orders,
+)
+from app.order.order_schemas import (
+    OrderCreate,
+    OrderResponse,
+    OrderItemCreate,
+    CartAddItem,
+    CartUpdateItem,
+    CartRemoveItem,
+    CartCheckout,
+    CartItemResponse,
+    CartResponse,
 )
 
 router = APIRouter(prefix="/orders", tags=["orders"])

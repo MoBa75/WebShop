@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
-from datamanager.schemas import UserUpdate, UserCreate
-from datamanager.user_service import UserService
-from datamanager.postgres_data_manager import PostgresDataManager
+from app.user.user_schemas import UserUpdate, UserCreate
+from app.user.user_service import UserService
+from app.postgres_data_manager import PostgresDataManager
 
 router = APIRouter()
 user_service = UserService(PostgresDataManager())
