@@ -13,18 +13,35 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     first_name = Column(String)
     last_name = Column(String)
-    company = Column(String)
     email = Column(String, unique=True, index=True)
-    phone_number = Column(String)
-    address = Column(String)
-    zip_code = Column(Integer)
-    city = Column(String)
+    company = Column(String, nullable=True)
     is_admin = Column(Boolean, default=False)
     birth_date = Column(Date, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     orders = relationship("Order", back_populates="user")
+    addresses = relationship("Address", back_populates="user", cascade="all, delete-orphan")
+
+
+class Address(Base):
+    """
+    Represents an address used by a user for billing or shipping.
+    """
+    __tablename__ = "addresses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    street = Column(String)
+    zip_code = Column(Integer)
+    city = Column(String)
+    country = Column(String)
+    is_billing = Column(Boolean, default=False)
+    is_shipping = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("User", back_populates="addresses")
 
 
 class Product(Base):
@@ -54,6 +71,8 @@ class Order(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
+    shipping_address_id = Column(Integer, ForeignKey("addresses.id"))
+    billing_address_id = Column(Integer, ForeignKey("addresses.id"))
     date = Column(DateTime, default=datetime.utcnow)
     status = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -63,6 +82,8 @@ class Order(Base):
     items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
     invoice = relationship("Invoice", back_populates="order", uselist=False)
     shipment = relationship("Shipment", back_populates="order", uselist=False)
+    shipping_address = relationship("Address", foreign_keys=[shipping_address_id])
+    billing_address = relationship("Address", foreign_keys=[billing_address_id])
 
 
 class OrderItem(Base):
