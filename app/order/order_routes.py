@@ -10,15 +10,10 @@ from app.order.order_service import (
     get_user_orders,
 )
 from app.order.order_schemas import (
-    OrderCreate,
-    OrderResponse,
-    OrderItemCreate,
     CartAddItem,
     CartUpdateItem,
     CartRemoveItem,
     CartCheckout,
-    CartItemResponse,
-    CartResponse,
 )
 
 router = APIRouter(prefix="/orders", tags=["orders"])
@@ -36,12 +31,12 @@ def view_cart(user_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/cart/add")
-def add_product_to_cart(user_id: int, product_id: int, quantity: int, db: Session = Depends(get_db)):
+def add_product_to_cart(payload: CartAddItem, db: Session = Depends(get_db)):
     """
-    Adds a product to the user's cart.
+    Adds a product to the user's cart using Pydantic schema.
     """
     try:
-        return add_to_cart(db, user_id, product_id, quantity)
+        return add_to_cart(db, payload.user_id, payload.product_id, payload.quantity)
     except HTTPException as http_error:
         raise http_error
     except Exception as error:
@@ -49,12 +44,12 @@ def add_product_to_cart(user_id: int, product_id: int, quantity: int, db: Sessio
 
 
 @router.put("/cart/update")
-def update_product_in_cart(user_id: int, product_id: int, quantity: int, db: Session = Depends(get_db)):
+def update_product_in_cart(payload: CartUpdateItem, db: Session = Depends(get_db)):
     """
-    Updates the quantity of a product in the user's cart.
+    Updates the quantity of a product in the user's cart using Pydantic schema.
     """
     try:
-        return update_cart_item(db, user_id, product_id, quantity)
+        return update_cart_item(db, payload.user_id, payload.product_id, payload.quantity)
     except HTTPException as http_error:
         raise http_error
     except Exception as error:
@@ -62,25 +57,25 @@ def update_product_in_cart(user_id: int, product_id: int, quantity: int, db: Ses
 
 
 @router.delete("/cart/remove")
-def remove_product_from_cart(user_id: int, product_id: int, db: Session = Depends(get_db)):
+def remove_product_from_cart(payload: CartRemoveItem, db: Session = Depends(get_db)):
     """
-    Removes a product from the user's cart.
+    Removes a product from the user's cart using Pydantic schema.
     """
     try:
-        return remove_from_cart(db, user_id, product_id)
+        return remove_from_cart(db, payload.user_id, payload.product_id)
     except HTTPException as http_error:
         raise http_error
     except Exception as error:
         raise HTTPException(status_code=500, detail=str(error))
 
 
-@router.post("/cart/checkout/{user_id}")
-def checkout_user_cart(user_id: int, db: Session = Depends(get_db)):
+@router.post("/cart/checkout")
+def checkout_user_cart(payload: CartCheckout, db: Session = Depends(get_db)):
     """
     Finalizes the cart by changing its status to 'abgeschlossen' and deducting stock.
     """
     try:
-        return checkout_cart(db, user_id)
+        return checkout_cart(db, payload.user_id)
     except HTTPException as http_error:
         raise http_error
     except Exception as error:

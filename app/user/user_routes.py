@@ -8,6 +8,9 @@ user_service = UserService(PostgresDataManager())
 
 @router.get("/", summary="Get all users")
 def get_all_users():
+    """
+    Retrieve a list of all users.
+    """
     result = user_service.get_all_users()
     if isinstance(result, tuple):
         raise HTTPException(status_code=result[1], detail=result[0]["error"])
@@ -15,6 +18,9 @@ def get_all_users():
 
 @router.get("/{user_id}", summary="Get user by ID")
 def get_user(user_id: int):
+    """
+    Retrieve a single user by their ID.
+    """
     result = user_service.get_user_by_id(user_id)
     if isinstance(result, tuple):
         raise HTTPException(status_code=result[1], detail=result[0]["error"])
@@ -22,20 +28,29 @@ def get_user(user_id: int):
 
 @router.post("/", summary="Create a new user")
 def create_user(user: UserCreate):
-    result = user_service.create_user(**user.dict())
+    """
+    Create a new user using validated input data.
+    """
+    result = user_service.create_user(**user.model_dump())
     if isinstance(result, tuple) and result[1] != 200:
         raise HTTPException(status_code=result[1], detail=result[0]["error"])
     return {"message": "User created successfully"}
 
 @router.put("/{user_id}", summary="Update a user")
 def update_user(user_id: int, update_data: UserUpdate):
-    result = user_service.update_user(user_id, **update_data.dict(exclude_unset=True))
+    """
+    Update an existing user's information.
+    """
+    result = user_service.update_user(user_id, **update_data.model_dump(exclude_unset=True))
     if isinstance(result, tuple) and result[1] != 200:
         raise HTTPException(status_code=result[1], detail=result[0]["error"])
     return result
 
 @router.delete("/{user_id}", summary="Delete a user")
 def delete_user(user_id: int):
+    """
+    Delete a user by their ID.
+    """
     result = user_service.delete_user(user_id)
     if isinstance(result, tuple) and result[1] != 200:
         raise HTTPException(status_code=result[1], detail=result[0]["error"])
