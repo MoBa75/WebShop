@@ -3,7 +3,6 @@ from typing import Tuple, Optional, List, Union
 from app.data_manager_interface import DataManagerInterface
 from sqlalchemy.orm import Session
 
-
 def user_exists_by_id(db: Session, user_id: int) -> bool:
     """
     Checks whether a user with the given ID exists in the database.
@@ -16,7 +15,6 @@ def user_exists_by_id(db: Session, user_id: int) -> bool:
         bool: True if the user exists, False otherwise.
     """
     return db.query(User).filter(User.id == user_id).first() is not None
-
 
 def user_exists_by_email(db: Session, email: str) -> bool:
     """
@@ -31,11 +29,10 @@ def user_exists_by_email(db: Session, email: str) -> bool:
     """
     return db.query(User).filter(User.email == email).first() is not None
 
-
 class UserService:
     """
     Service class for managing users.
-    Handles all business logic related to user creation, retrieval, updating, and deletion.
+    Handles creation, retrieval, updating, and deletion of users.
     """
 
     def __init__(self, data_manager: DataManagerInterface):
@@ -47,23 +44,20 @@ class UserService:
         """
         self.data_manager = data_manager
 
-    def create_user(self, first_name: str, last_name: str, email: str, phone_number: str,
-                    address: str, zip_code: int, city: str, is_admin: bool = False,
-                    company: Optional[str] = None, birth_date: Optional[str] = None) -> Tuple[dict, int]:
+    def create_user(self, sub: str, email: str, first_name: Optional[str] = None,
+                    last_name: Optional[str] = None, company: Optional[str] = None,
+                    birth_date: Optional[str] = None, is_admin: bool = False) -> Tuple[dict, int]:
         """
-        Creates a new user if the email address is not already taken.
+        Creates a new user record based on Auth0 information.
 
         Args:
-            first_name (str): User's first name.
-            last_name (str): User's last name.
-            email (str): User's email address.
-            phone_number (str): User's phone number.
-            address (str): Street and house number.
-            zip_code (int): Postal code.
-            city (str): City of residence.
-            is_admin (bool, optional): Whether the user is an admin.
-            company (str, optional): Company name, if applicable.
-            birth_date (str, optional): Birth date of the user (ISO format: YYYY-MM-DD).
+            sub (str): Auth0 unique user identifier.
+            email (str): User email.
+            first_name (str, optional): User's first name.
+            last_name (str, optional): User's last name.
+            company (str, optional): User's company.
+            birth_date (str, optional): User's birth date.
+            is_admin (bool): Whether user has admin privileges.
 
         Returns:
             Tuple[dict, int]: A success or error message with an HTTP status code.
@@ -72,18 +66,13 @@ class UserService:
             return {"error": "A user with this email already exists."}, 409
 
         new_user = User(
+            email=email,
             first_name=first_name,
             last_name=last_name,
             company=company,
-            email=email,
-            phone_number=phone_number,
-            address=address,
-            zip_code=zip_code,
-            city=city,
-            is_admin=is_admin,
-            birth_date=birth_date
+            birth_date=birth_date,
+            is_admin=is_admin
         )
-
         return self.data_manager.add_element(new_user)
 
     def get_user_by_id(self, user_id: int) -> Union[User, Tuple[dict, int]]:

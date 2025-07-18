@@ -11,17 +11,18 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    first_name = Column(String)
-    last_name = Column(String)
-    email = Column(String, unique=True, index=True)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
     company = Column(String, nullable=True)
     is_admin = Column(Boolean, default=False)
-    birth_date = Column(Date, nullable=True)
+    birth_date = Column(Date, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     orders = relationship("Order", back_populates="user")
     addresses = relationship("Address", back_populates="user", cascade="all, delete-orphan")
+
 
 
 class Address(Base):
@@ -32,16 +33,17 @@ class Address(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
-    street = Column(String)
-    zip_code = Column(Integer)
-    city = Column(String)
-    country = Column(String)
+    street = Column(String, nullable=False)
+    zip_code = Column(Integer, nullable=False)
+    city = Column(String, nullable=False)
+    country = Column(String, nullable=False)
     is_billing = Column(Boolean, default=False)
     is_shipping = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user = relationship("User", back_populates="addresses")
+
 
 
 class Product(Base):
@@ -51,16 +53,17 @@ class Product(Base):
     __tablename__ = "products"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
-    unit = Column(String)
-    price = Column(Float)
-    description = Column(String)
-    stock = Column(Integer)
+    name = Column(String, nullable=False)
+    unit = Column(String, nullable=False)
+    price = Column(Float, nullable=False)
+    description = Column(String, nullable=False)
+    stock = Column(Integer, nullable=False)
     image_path = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     order_items = relationship("OrderItem", back_populates="product")
+
 
 
 class Order(Base):
@@ -70,9 +73,9 @@ class Order(Base):
     __tablename__ = "orders"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    shipping_address_id = Column(Integer, ForeignKey("addresses.id"))
-    billing_address_id = Column(Integer, ForeignKey("addresses.id"))
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    shipping_address_id = Column(Integer, ForeignKey("addresses.id"), nullable=False)
+    billing_address_id = Column(Integer, ForeignKey("addresses.id"), nullable=False)
     date = Column(DateTime, default=datetime.utcnow)
     status = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -95,8 +98,8 @@ class OrderItem(Base):
     id = Column(Integer, primary_key=True, index=True)
     order_id = Column(Integer, ForeignKey("orders.id"))
     product_id = Column(Integer, ForeignKey("products.id"))
-    quantity = Column(Integer)
-    unit_price = Column(Float)
+    quantity = Column(Integer, nullable=False)
+    unit_price = Column(Float, nullable=False)
 
     order = relationship("Order", back_populates="items")
     product = relationship("Product", back_populates="order_items")
